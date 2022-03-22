@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "249054731291",
+    "project_id": "tsdo-f0d08",
+    "storage_bucket": "tsdo-f0d08.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:249054731291:android:063533ffc02cd43dc86cbe",
+        "android_client_info": {
+          "package_name": "com.example.tsdo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "249054731291-1o7p3fpmgbhh74318utg1iapuk4e29bs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK3vq1Z0qjIW-qe2_ergid11YcFjScr78"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "249054731291-1o7p3fpmgbhh74318utg1iapuk4e29bs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
