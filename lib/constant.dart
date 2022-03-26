@@ -16,6 +16,7 @@ const MaterialColor primaryColor = MaterialColor(
   },
 );
 
+List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 double height(context) {
   return MediaQuery.of(context).size.height;
 }

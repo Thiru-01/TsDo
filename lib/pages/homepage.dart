@@ -13,25 +13,25 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  StateController stateController = Get.put(StateController());
   @override
   void initState() {
-    controllerGet1.getQuery();
+    dataConroller.getQuery();
+    dataConroller.getGraphData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    ControllerGet2 controllerGet2 = Get.put(ControllerGet2());
-
     GlobalKey formkey = GlobalKey<FormState>();
     List<Widget> screens = [
-      mainMethod(context, chartData),
+      mainMethod(context),
       secondMethod(context, formkey)
     ];
     return Obx(() => Scaffold(
-          body: screens[controllerGet2.state.value],
+          body: screens[stateController.state.value],
           bottomNavigationBar: BottomNavigationBar(
-            currentIndex: controllerGet2.state.value == 1 ? 2 : 0,
+            currentIndex: stateController.state.value == 1 ? 2 : 0,
             selectedItemColor: primaryColor.shade700,
             showSelectedLabels: false,
             showUnselectedLabels: false,
@@ -39,7 +39,7 @@ class _HomePageState extends State<HomePage> {
               if (value == 1) {
                 showSheet(context, formkey);
               } else {
-                controllerGet2.changeState(value == 0 ? 0 : value - 1);
+                stateController.changeState(value == 0 ? 0 : value - 1);
               }
             },
             iconSize: height(context) * 0.04,
@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-  SafeArea mainMethod(BuildContext context, List<ChartData> chartData) {
+  SafeArea mainMethod(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -122,12 +122,52 @@ class _HomePageState extends State<HomePage> {
                     fontWeight: FontWeight.bold),
               ),
             ),
-            mordernGraph(chartData, context),
+            Obx(() => Padding(
+                  padding: EdgeInsets.only(
+                      left: width(context) * 0.05,
+                      right: width(context) * 0.05),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(width(context) * 0.01),
+                            border: Border.all(
+                                width: 1, color: primaryColor.shade100)),
+                        constraints: BoxConstraints(
+                          maxWidth: width(context) * 0.4,
+                        ),
+                        height: height(context) * 0.06,
+                        child: Center(
+                          child: DropdownButton<String>(
+                              value: dataConroller.dropValue.string,
+                              elevation: 0,
+                              menuMaxHeight: height(context) * 0.2,
+                              underline: Container(),
+                              items: const [
+                                DropdownMenuItem(
+                                    value: "cin",
+                                    child: Text("Cinnamon Powder")),
+                                DropdownMenuItem(
+                                  value: "fen",
+                                  child: Text("Fenugreek Water"),
+                                ),
+                              ],
+                              onChanged: (item) {
+                                dataConroller.changeDrop(item!);
+                              }),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+            mordernGraph(context),
             Padding(
               padding: EdgeInsets.only(
                   left: width(context) * 0.05, bottom: width(context) * 0.02),
               child: Text(
-                "Your Weekly achivement",
+                "Ongoing Task",
                 style: TextStyle(
                     fontSize: scalefactor(context) * 20,
                     fontWeight: FontWeight.bold),
@@ -139,25 +179,42 @@ class _HomePageState extends State<HomePage> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: card(height(context) * 0.15, width(context) * 0.5,
-                          context, "Yesterday Report"),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: card(height(context) * 0.15, width(context) * 0.5,
-                          context, "Last Month Report"),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: card(height(context) * 0.15, width(context) * 0.5,
-                          context, "Last Month Report"),
-                    ),
-                  ],
-                ),
+                child: Obx(() => Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: card(
+                              height(context) * 0.15,
+                              width(context) * 0.5,
+                              context,
+                              "Yesterday Report",
+                              dataConroller.yester.value.toDouble(),
+                              (dataConroller.yester.value * 100.00).toString()),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: card(
+                              height(context) * 0.15,
+                              width(context) * 0.5,
+                              context,
+                              "Last Week Report",
+                              (dataConroller.weekTotal.value / 7),
+                              ((dataConroller.weekTotal.value / 7) * 100)
+                                  .toPrecision(2)
+                                  .toString()),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: card(
+                              height(context) * 0.15,
+                              width(context) * 0.5,
+                              context,
+                              "Last Month Report",
+                              0.0,
+                              "0"),
+                        ),
+                      ],
+                    )),
               ),
             ),
             Padding(
@@ -197,43 +254,52 @@ class _HomePageState extends State<HomePage> {
                                 fontSize: 15 * scalefactor(context),
                                 fontWeight: FontWeight.bold),
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              RichText(
-                                  text: TextSpan(
-                                      text: "Status: ",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          wordSpacing: 2,
-                                          fontSize: 15 * scalefactor(context)),
-                                      children: const [
-                                    TextSpan(
-                                        text: 'Pending',
-                                        style: TextStyle(
-                                            color: Colors.redAccent,
-                                            fontWeight: FontWeight.bold))
-                                  ])),
-                              SizedBox(
-                                height: height(context) * 0.01,
-                              ),
-                              RichText(
-                                  text: TextSpan(
-                                      text: "Time: ",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          wordSpacing: 2,
-                                          fontSize: 15 * scalefactor(context)),
-                                      children: const [
-                                    TextSpan(
-                                        text: '9.30 Am',
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold))
-                                  ])),
-                            ],
-                          )
+                          Obx(() => Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  RichText(
+                                      text: TextSpan(
+                                          text: "Status: ",
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              wordSpacing: 2,
+                                              fontSize:
+                                                  15 * scalefactor(context)),
+                                          children: [
+                                        TextSpan(
+                                            text: dataConroller
+                                                    .yester.value.isEven
+                                                ? 'Pending'
+                                                : "Done",
+                                            style: TextStyle(
+                                                color: dataConroller
+                                                        .yester.value.isEven
+                                                    ? Colors.redAccent
+                                                    : Colors.green,
+                                                fontWeight: FontWeight.bold))
+                                      ])),
+                                  SizedBox(
+                                    height: height(context) * 0.01,
+                                  ),
+                                  RichText(
+                                      text: TextSpan(
+                                          text: "Time: ",
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              wordSpacing: 2,
+                                              fontSize:
+                                                  15 * scalefactor(context)),
+                                          children: const [
+                                        TextSpan(
+                                            text: '9.30 Am',
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold))
+                                      ])),
+                                ],
+                              ))
                         ],
                       )
                     ],
@@ -244,51 +310,56 @@ class _HomePageState extends State<HomePage> {
                           BorderRadius.circular(width(context) * 0.01)),
                 ),
               ),
-            )
+            ),
           ]),
         ),
       ),
     );
   }
 
-  SfCartesianChart mordernGraph(
-      List<ChartData> chartData, BuildContext context) {
-    return SfCartesianChart(
-      plotAreaBorderWidth: 0,
-      series: <CartesianSeries>[
-        SplineAreaSeries<ChartData, String>(
-            dataSource: chartData,
-            borderColor: primaryColor,
-            borderWidth: 3,
-            gradient: LinearGradient(
-              stops: const [
-                -0.001,
-                0.36,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                const Color(0xFF6715b1).withOpacity(0.4),
-                const Color(0xFFffffff).withOpacity(0.1),
-              ],
-            ),
-            animationDuration: 20,
-            xValueMapper: (ChartData data, _) => data.x,
-            yValueMapper: (ChartData data, _) => data.y)
-      ],
-      primaryXAxis: CategoryAxis(
-        labelStyle: TextStyle(
-            color: primaryColor.shade300,
-            fontSize: scalefactor(context) * 12,
-            fontWeight: FontWeight.bold),
-        axisLine: const AxisLine(width: 0),
-        majorGridLines: const MajorGridLines(width: 0),
-        majorTickLines: const MajorTickLines(width: 0),
-      ),
-      primaryYAxis: NumericAxis(isVisible: false, maximum: 3),
-      tooltipBehavior:
-          TooltipBehavior(canShowMarker: false, shadowColor: primaryColor),
-    );
+  Widget mordernGraph(BuildContext context) {
+    return Obx(() => SfCartesianChart(
+          plotAreaBorderWidth: 0,
+          enableAxisAnimation: true,
+          series: <CartesianSeries>[
+            SplineAreaSeries<ChartData, String>(
+                // ignore: invalid_use_of_protected_member
+                dataSource: dataConroller.chartData.value,
+                borderColor: primaryColor,
+                animationDelay: 150,
+                borderWidth: 3,
+                gradient: LinearGradient(
+                  stops: const [
+                    -0.001,
+                    0.36,
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF6715b1).withOpacity(0.4),
+                    const Color(0xFFffffff).withOpacity(0.1),
+                  ],
+                ),
+                animationDuration: 1500,
+                xValueMapper: (ChartData data, _) => data.x,
+                yValueMapper: (ChartData data, _) => data.y)
+          ],
+          primaryXAxis: CategoryAxis(
+            labelStyle: TextStyle(
+                color: primaryColor.shade300,
+                fontSize: scalefactor(context) * 12,
+                fontWeight: FontWeight.bold),
+            axisLine: const AxisLine(width: 0),
+            majorGridLines: const MajorGridLines(width: 0),
+            majorTickLines: const MajorTickLines(width: 0),
+          ),
+          primaryYAxis: NumericAxis(
+              isVisible: false,
+              maximum: 3,
+              rangePadding: ChartRangePadding.additional),
+          tooltipBehavior:
+              TooltipBehavior(canShowMarker: false, shadowColor: primaryColor),
+        ));
   }
 }
 

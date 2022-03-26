@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:tsdo/constant.dart';
+import 'package:tsdo/controller/controller.dart';
 import 'package:tsdo/pages/homepage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+  Get.put(DataController(), tag: 'controllerData');
   runApp(const MyApp());
 }
 

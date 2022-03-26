@@ -3,31 +3,12 @@ import 'package:get/get.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:tsdo/constant.dart';
 import 'package:tsdo/controller/controller.dart';
-import 'package:tsdo/pages/homepage.dart';
 
-final List<ChartData> chartData = [
-  ChartData('Mon', 1),
-  ChartData('Tue', 2),
-  ChartData('Wed', 1),
-  ChartData('Thru', 2),
-  ChartData(
-    'Fri',
-    2,
-  ),
-  ChartData(
-    'Sat',
-    2,
-  ),
-  ChartData(
-    'Sun',
-    2,
-  )
-];
-
-ControllerGet1 controllerGet1 = Get.put(ControllerGet1());
+final DateFormat formatter = DateFormat('dd-MM-yyyy');
+final DateFormat timeFormatter = DateFormat('h:mm a');
+final DataController dataConroller = Get.find(tag: "controllerData");
 AlertDialog dialog = AlertDialog(
   content: const Text('Did you finished the task ?'),
   actions: [
@@ -47,94 +28,21 @@ AlertDialog dialog = AlertDialog(
   ],
 );
 
-SfCartesianChart mordernGraph(List<ChartData> chartData, BuildContext context) {
-  return SfCartesianChart(
-    plotAreaBorderWidth: 0,
-    series: <CartesianSeries>[
-      SplineAreaSeries<ChartData, String>(
-          dataSource: chartData,
-          borderColor: primaryColor,
-          borderWidth: 3,
-          gradient: LinearGradient(
-            stops: const [
-              -0.001,
-              0.36,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFF6715b1).withOpacity(0.4),
-              const Color(0xFFffffff).withOpacity(0.1),
-            ],
-          ),
-          animationDuration: 20,
-          xValueMapper: (ChartData data, _) => data.x,
-          yValueMapper: (ChartData data, _) => data.y)
-    ],
-    primaryXAxis: CategoryAxis(
-      labelStyle: TextStyle(
-          color: primaryColor.shade300,
-          fontSize: scalefactor(context) * 12,
-          fontWeight: FontWeight.bold),
-      axisLine: const AxisLine(width: 0),
-      majorGridLines: const MajorGridLines(width: 0),
-      majorTickLines: const MajorTickLines(width: 0),
-    ),
-    primaryYAxis: NumericAxis(isVisible: false, maximum: 3),
-    tooltipBehavior:
-        TooltipBehavior(canShowMarker: false, shadowColor: primaryColor),
-  );
-}
-
-Container card(double height, double width, context, String title) {
+Container card(double height, double width, context, String title,
+    double percent, String valuePer) {
   return Container(
-    height: height,
-    width: width,
-    decoration: BoxDecoration(
-        color: Colors.grey.shade200, borderRadius: BorderRadius.circular(20)),
-    child: Padding(
-      padding: EdgeInsets.all(height * 0.08),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-              text: TextSpan(
-                  text: "Title: ",
-                  style: TextStyle(
-                      color: Colors.black,
-                      wordSpacing: 2,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16 * scalefactor(context)),
-                  children: [
-                TextSpan(
-                    text: title,
-                    style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                        color: primaryColor.withOpacity(0.8)))
-              ])),
-          SizedBox(
-            height: height * 0.09,
-          ),
-          Flexible(
-              child: LinearPercentIndicator(
-            backgroundColor: primaryColor.shade100,
-            padding: const EdgeInsets.only(right: 10, left: 0),
-            animation: true,
-            progressColor: primaryColor,
-            curve: Curves.easeInOutCubic,
-            percent: 0.2,
-            trailing: const Text('20 %'),
-            barRadius: Radius.circular(width * 0.1),
-            animationDuration: 1200,
-            lineHeight: height * 0.05,
-          )),
-          SizedBox(
-            height: height * 0.09,
-          ),
-          Flexible(
-            child: RichText(
+      height: height,
+      width: width,
+      decoration: BoxDecoration(
+          color: Colors.grey.shade200, borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: EdgeInsets.all(height * 0.08),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
                 text: TextSpan(
-                    text: "Task: ",
+                    text: "Title: ",
                     style: TextStyle(
                         color: Colors.black,
                         wordSpacing: 2,
@@ -142,16 +50,50 @@ Container card(double height, double width, context, String title) {
                         fontSize: 16 * scalefactor(context)),
                     children: [
                   TextSpan(
-                      text: "Cinnamon Powder",
+                      text: title,
                       style: TextStyle(
-                          fontWeight: FontWeight.w200,
-                          fontSize: 14 * scalefactor(context)))
+                          fontWeight: FontWeight.normal,
+                          color: primaryColor.withOpacity(0.8)))
                 ])),
-          ),
-        ],
-      ),
-    ),
-  );
+            SizedBox(
+              height: height * 0.09,
+            ),
+            Flexible(
+                child: LinearPercentIndicator(
+              backgroundColor: primaryColor.shade100,
+              padding: const EdgeInsets.only(right: 10, left: 0),
+              animation: true,
+              progressColor: primaryColor,
+              curve: Curves.easeInOutCubic,
+              percent: percent,
+              trailing: Text('$valuePer %'),
+              barRadius: Radius.circular(width * 0.1),
+              animationDuration: 1200,
+              lineHeight: height * 0.05,
+            )),
+            SizedBox(
+              height: height * 0.09,
+            ),
+            Flexible(
+              child: RichText(
+                  text: TextSpan(
+                      text: "Task: ",
+                      style: TextStyle(
+                          color: Colors.black,
+                          wordSpacing: 2,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16 * scalefactor(context)),
+                      children: [
+                    TextSpan(
+                        text: dataConroller.selectedString.value,
+                        style: TextStyle(
+                            fontWeight: FontWeight.w200,
+                            fontSize: 14 * scalefactor(context)))
+                  ])),
+            ),
+          ],
+        ),
+      ));
 }
 
 showSheet(context, formKey) {
@@ -218,7 +160,7 @@ showSheet(context, formKey) {
                                     ),
                                     TextFormField(
                                       controller:
-                                          controllerGet1.titleController.value,
+                                          dataConroller.titleController.value,
                                       validator: (value) {
                                         if (value!.isNotEmpty) {
                                           return null;
@@ -266,7 +208,7 @@ showSheet(context, formKey) {
                                       },
                                       textInputAction: TextInputAction.next,
                                       controller:
-                                          controllerGet1.dateController.value,
+                                          dataConroller.dateController.value,
                                       style: TextStyle(
                                           color: primaryColor.withOpacity(0.8)),
                                       onTap: () async {
@@ -278,7 +220,7 @@ showSheet(context, formKey) {
                                             initialDate: DateTime.now(),
                                             firstDate: DateTime.now(),
                                             lastDate: DateTime(2050));
-                                        controllerGet1
+                                        dataConroller
                                             .dateSet(formatter.format(date!));
                                       },
                                       decoration: InputDecoration(
@@ -321,7 +263,7 @@ showSheet(context, formKey) {
                                         return 'Please set time';
                                       },
                                       controller:
-                                          controllerGet1.timeController.value,
+                                          dataConroller.timeController.value,
                                       style: TextStyle(
                                           color: primaryColor.withOpacity(0.8)),
                                       onTap: () async {
@@ -331,7 +273,7 @@ showSheet(context, formKey) {
                                             context: context,
                                             initialTime: TimeOfDay.now());
                                         final now = DateTime.now();
-                                        controllerGet1.timeSet(formatter.format(
+                                        dataConroller.timeSet(formatter.format(
                                             DateTime(
                                                 now.year,
                                                 now.month,
@@ -360,7 +302,7 @@ showSheet(context, formKey) {
                                 child: TextButton(
                                     onPressed: () {
                                       if (formKey.currentState.validate()) {
-                                        controllerGet1.setQuery(context);
+                                        dataConroller.setQuery(context);
                                       }
                                     },
                                     style: TextButton.styleFrom(
@@ -409,63 +351,62 @@ Widget secondMethod(context, formkey) {
           ),
         ),
         Obx(() => Expanded(
-              child: SingleChildScrollView(
-                child: ListView.separated(
-                    shrinkWrap: true,
-                    separatorBuilder: (context, sep) {
-                      return const Divider();
-                    },
-                    itemCount: controllerGet1.itemsData.length,
-                    itemBuilder: (context, i) {
-                      return Dismissible(
-                          background: slideRightBackground(),
-                          confirmDismiss: (direction) async {
-                            if (direction == DismissDirection.startToEnd) {
-                              controllerGet1.fillData(i);
-                              controllerGet1.updateContent(i);
-                              bool res = await showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return editDialog(i, context, formkey);
-                                  });
-                              return res;
-                            }
-                            final bool res = await showDialog(
+              child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  separatorBuilder: (context, sep) {
+                    return const Divider();
+                  },
+                  itemCount: dataConroller.itemsData.length,
+                  itemBuilder: (context, i) {
+                    return Dismissible(
+                        background: slideRightBackground(),
+                        confirmDismiss: (direction) async {
+                          if (direction == DismissDirection.startToEnd) {
+                            dataConroller.fillData(i);
+                            dataConroller.updateContent(i);
+                            bool res = await showDialog(
                                 context: context,
-                                builder: (BuildContext context) {
-                                  return deletAlert(i, context);
+                                builder: (context) {
+                                  return editDialog(i, context, formkey);
                                 });
                             return res;
-                          },
-                          secondaryBackground: slideLeftBackground(),
-                          key: Key(controllerGet1.itemsData[i].taskname),
-                          child: ListTile(
-                            title: Text(
-                              controllerGet1.itemsData[i].taskname
-                                  .toString()
-                                  .toUpperCase(),
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17 * scalefactor(context)),
-                            ),
-                            trailing: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  controllerGet1.itemsData[i].time,
+                          }
+                          final bool res = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return deletAlert(i, context);
+                              });
+                          return res;
+                        },
+                        secondaryBackground: slideLeftBackground(),
+                        key: Key(dataConroller.itemsData[i].taskname),
+                        child: ListTile(
+                          title: Text(
+                            dataConroller.itemsData[i].taskname
+                                .toString()
+                                .toUpperCase(),
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17 * scalefactor(context)),
+                          ),
+                          trailing: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                dataConroller.itemsData[i].time,
+                                style: TextStyle(
+                                    color: primaryColor.withOpacity(0.5)),
+                              ),
+                              Text(dataConroller.itemsData[i].date,
                                   style: TextStyle(
-                                      color: primaryColor.withOpacity(0.5)),
-                                ),
-                                Text(controllerGet1.itemsData[i].date,
-                                    style: TextStyle(
-                                        color: primaryColor.withOpacity(0.5)))
-                              ],
-                            ),
-                          ));
-                    }),
-              ),
+                                      color: primaryColor.withOpacity(0.5)))
+                            ],
+                          ),
+                        ));
+                  }),
             )),
       ],
     ),
@@ -475,7 +416,7 @@ Widget secondMethod(context, formkey) {
 AlertDialog deletAlert(int i, BuildContext context) {
   return AlertDialog(
     content: Text(
-        "Are you sure you want to delete ${controllerGet1.itemsData[i].taskname}?"),
+        "Are you sure you want to delete ${dataConroller.itemsData[i].taskname}?"),
     actions: <Widget>[
       TextButton(
         child: const Text(
@@ -492,7 +433,7 @@ AlertDialog deletAlert(int i, BuildContext context) {
           style: TextStyle(color: Colors.red),
         ),
         onPressed: () {
-          controllerGet1.itemsData.removeAt(i);
+          dataConroller.itemsData.removeAt(i);
 
           Navigator.of(context).pop(true);
         },
@@ -510,7 +451,7 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
             style: TextStyle(color: Colors.black),
           ),
           onPressed: () {
-            controllerGet1.clearData();
+            dataConroller.clearData();
             Navigator.of(context).pop(false);
           },
         ),
@@ -520,8 +461,8 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
             style: TextStyle(color: Colors.green),
           ),
           onPressed: () {
-            controllerGet1.updateContent(i);
-            controllerGet1.clearData();
+            dataConroller.updateContent(i);
+            dataConroller.clearData();
             Navigator.of(context).pop(false);
           },
         ),
@@ -548,7 +489,7 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
                           height: height(context) * 0.01,
                         ),
                         TextFormField(
-                          controller: controllerGet1.titleController.value,
+                          controller: dataConroller.titleController.value,
                           validator: (value) {
                             if (value!.isNotEmpty) {
                               return null;
@@ -594,7 +535,7 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
                             return 'Please set date';
                           },
                           textInputAction: TextInputAction.next,
-                          controller: controllerGet1.dateController.value,
+                          controller: dataConroller.dateController.value,
                           style:
                               TextStyle(color: primaryColor.withOpacity(0.8)),
                           onTap: () async {
@@ -606,7 +547,7 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
                                 initialDate: DateTime.now(),
                                 firstDate: DateTime.now(),
                                 lastDate: DateTime(2050));
-                            controllerGet1.dateSet(formatter.format(date!));
+                            dataConroller.dateSet(formatter.format(date!));
                           },
                           decoration: InputDecoration(
                               hintText: 'Date and time',
@@ -646,7 +587,7 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
                             }
                             return 'Please set time';
                           },
-                          controller: controllerGet1.timeController.value,
+                          controller: dataConroller.timeController.value,
                           style:
                               TextStyle(color: primaryColor.withOpacity(0.8)),
                           onTap: () async {
@@ -655,9 +596,9 @@ AlertDialog editDialog(int i, BuildContext context, formkey) {
                             TimeOfDay? time = await showTimePicker(
                                 context: context,
                                 initialTime: TimeOfDay.fromDateTime(timeFormtter
-                                    .parse(controllerGet1.itemsData[i].time)));
+                                    .parse(dataConroller.itemsData[i].time)));
                             final now = DateTime.now();
-                            controllerGet1.timeSet(formatter.format(DateTime(
+                            dataConroller.timeSet(formatter.format(DateTime(
                                 now.year,
                                 now.month,
                                 now.day,
